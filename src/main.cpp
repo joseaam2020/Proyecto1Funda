@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <HCSR04.h>
 #include <ShiftRegister74HC595.h>
-#include <LowPower.h>
 
 HCSR04 hc(PD2, PD3); //clase sensor HCSR04 (trig pin , echo pin)
 ShiftRegister74HC595<1> shiftRegister(10,12,11);
@@ -12,7 +11,7 @@ void convertirDecimalBin(int num,byte *array);
 void convertirBinGray(byte *array,int length);
 int convertirBinDecimal(byte *array,int length);
 void printBin(byte *array);
-void wakeUp(){};
+
 //Constantes
 const float valorMaximo = 35.0;
 const byte hexa [10][8] = {
@@ -46,12 +45,6 @@ void setup(){
 
 void loop()
 {
-    //Encendido Apagado
-    if(!encendido){
-      attachInterrupt(digitalPinToInterrupt(13),wakeUp,LOW);
-      LowPower.powerDown(SLEEP_FOREVER,ADC_OFF,BOD_OFF);
-      detachInterrupt(digitalPinToInterrupt(13));
-    }
     //Sensor
     float distance = hc.dist();
     if(distance > valorMaximo){distance = valorMaximo;}//se reduce a valor maximo
@@ -139,6 +132,13 @@ void convertirBinGray(byte *array,int length){
   }
 }
 
+/*
+convertirBinDecimal: convierte el numero binario en forma de array a su equivalente en decimal
+param:
+    -byte* array: array de bytes con numero binario donde array[0] es LSB 
+    -int length: largo del array
+return: void
+*/
 int convertirBinDecimal(byte *array,int length){
     float num = 0;
     for(int i=0;i<length;i++){
