@@ -2,8 +2,11 @@
 #include <HCSR04.h>
 #include <ShiftRegister74HC595.h>
 
-HCSR04 hc(PD2, PD3); //clase sensor HCSR04 (trig pin , echo pin)
+//clase sensor HCSR04 (trig pin , echo pin)
+HCSR04 hc(PD2, PD3); 
+//clase registro corriemiento (ds pin, SHCP pin, STCP pin)
 ShiftRegister74HC595<1> shiftRegister(10,12,11);
+
 
 
 //Funciones 
@@ -50,29 +53,38 @@ void loop()
     if(distance > valorMaximo){distance = valorMaximo;}//se reduce a valor maximo
     float decimalCodificado = distance * (7.0 / valorMaximo);
     int intDecimalCodificado = int(trunc(decimalCodificado));//se codifica distancia a decimal
-    Serial.print("Decimal: ");
-    Serial.println(intDecimalCodificado);
     byte bin[3] = {0,0,0};//array numero binario
     convertirDecimalBin(intDecimalCodificado,bin); 
-    convertirBinGray(bin,3);
+    convertirBinGray(bin,3);//se convierte a Gray
     Serial.print("Gray: ");
-    printBin(bin);
+    printBin(bin);//Se imprime en consola 
+    Serial.print("Gray Hexadecimal: ");
+    int grayHex = convertirBinDecimal(bin,3);
+    Serial.println(grayHex);
     Serial.println();
     digitalWrite(PD4,bin[0]);
     digitalWrite(PD5,bin[1]);
-    digitalWrite(PD6,bin[2]);
+    digitalWrite(PD6,bin[2]);//se escribe en pines D3,D4,D5
     delay(1000);
     bin[0] = digitalRead(7);
     bin[1] = digitalRead(8);
-    bin[2] = digitalRead(9);
+    bin[2] = digitalRead(9);//se lee exceso tres de pines D7,D8,D9
     Serial.print("Exceso 3: ");
-    printBin(bin);
+    printBin(bin);//se imprime en consola
     int indice = convertirBinDecimal(bin,3);
     for(int i=0;i < 8;i++){
-        shiftRegister.set(i,hexa[indice][i]);
+        shiftRegister.set(i,hexa[indice][i]);//se imprime en 7 segmentos
     }
+    delay(500);
 }
 
+
+/*
+printBin:imprime en serial el array 
+param:
+    -byte* array: array de bytes donde guardar el numero binario
+return: void
+*/
 void printBin(byte *array){
   for(int i = 2;i>-1;i--){
     Serial.print(array[i]);
